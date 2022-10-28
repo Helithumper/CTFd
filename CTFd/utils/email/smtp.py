@@ -6,14 +6,30 @@ from socket import timeout
 from CTFd.utils import get_app_config, get_config
 
 
-def get_smtp(host, port, username=None, password=None, TLS=None, SSL=None, auth=None):
+def get_smtp(host, port, username=None, password=None, TLS=None, SSL=None, auth=None) -> smtplib.SMTP:
+    """Get an SMTP connection to the specified host and port.
+
+    Args:
+        host (str): The SMTP server host.
+        port (str): The SMTP server port.
+        username (str, optional): Username to authenticate to the SMTP server. Defaults to None.
+        password (str, optional): Password authenticate to the SMTP server. Defaults to None.
+        TLS (Bool, optional): Use a TLS connection with the SMTP client. Overrides SSL. Defaults to None.
+        SSL (Bool, optional): Use an SSL-based SMTP Client. Is overriden by TLS. Defaults to None.
+        auth (Bool, optional): Whether to authenticate to the SMTP server. Defaults to None.
+
+    Returns:
+        smtplib.SMTP: SMTP Client 
+    """
     if SSL is None:
         smtp = smtplib.SMTP(host, port, timeout=3)
+        if TLS:
+            # TLS is not supported with SSL connections with the smtplib module
+            # Thus, enabling both TLS and SSL should result in TLS being enabled
+            # and the SSL client not being enabled
+            smtp.starttls()
     else:
         smtp = smtplib.SMTP_SSL(host, port, timeout=3)
-
-    if TLS:
-        smtp.starttls()
 
     if auth:
         smtp.login(username, password)
